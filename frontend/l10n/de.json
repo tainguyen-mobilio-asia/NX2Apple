@@ -1899,6 +1899,8 @@
   "settings.setup": "Einrichtung erneut ausführen",
   "settings.setupBtn": "Ausführen",
   "settings.setupNote": "Die Ersteinrichtung noch einmal durchgehen: Xcode, Build-Werkzeuge, Schlüssel und Spiele",
+  "settings.showFPS": "Bildrate in Spielen anzeigen",
+  "settings.showFPSNote": "Jedes Mac-Spiel, das der Launcher startet, zeigt seine Bilder pro Sekunde in einem kleinen Feld oben links. Ein Spiel, das vor diesem Schalter gebaut wurde, muss einmal neu gebaut werden",
   "settings.showTools": "Werkzeuge zeigen",
   "settings.toolMissing": "Ein benötigtes Werkzeug fehlt",
   "settings.updates": "App-Updates",

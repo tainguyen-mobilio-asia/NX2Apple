@@ -1898,6 +1898,8 @@
   "settings.setup": "설정 다시 실행",
   "settings.setupBtn": "실행",
   "settings.setupNote": "첫 실행 설정을 다시 진행합니다: Xcode, 빌드 도구, 키, 게임",
+  "settings.showFPS": "게임에서 프레임 속도 표시",
+  "settings.showFPSNote": "런처에서 시작한 모든 Mac 게임이 왼쪽 위의 작은 배지에 초당 프레임 수를 표시합니다. 이 스위치가 생기기 전에 빌드한 게임은 한 번 다시 빌드해야 합니다",
   "settings.showTools": "도구 보기",
   "settings.toolMissing": "필요한 도구가 없습니다",
   "settings.updates": "앱 업데이트",

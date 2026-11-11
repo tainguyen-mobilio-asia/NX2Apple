@@ -1897,6 +1897,8 @@
   "settings.setup": "セットアップをもう一度実行",
   "settings.setupBtn": "実行",
   "settings.setupNote": "初回セットアップをもう一度行います：Xcode、ビルドツール、キー、ゲーム",
+  "settings.showFPS": "ゲーム中にフレームレートを表示",
+  "settings.showFPSNote": "ランチャーから起動した Mac のゲームは、左上の小さなバッジに毎秒のフレーム数を表示します。このスイッチができる前にビルドしたゲームは、一度リビルドが必要です",
   "settings.showTools": "ツールを表示",
   "settings.toolMissing": "必要なツールが見つかりません",
   "settings.updates": "アプリのアップデート",

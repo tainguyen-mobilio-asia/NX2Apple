@@ -1898,6 +1898,8 @@
   "settings.setup": "Relancer la configuration",
   "settings.setupBtn": "Lancer",
   "settings.setupNote": "Refaire la configuration initiale : Xcode, outils de compilation, clés et jeux",
+  "settings.showFPS": "Afficher les images par seconde dans les jeux",
+  "settings.showFPSNote": "Chaque jeu Mac lancé depuis le lanceur affiche ses images par seconde dans une petite pastille en haut à gauche. Un jeu compilé avant l'existence de ce réglage doit être recompilé une fois",
   "settings.showTools": "Afficher les outils",
   "settings.toolMissing": "Un outil requis est manquant",
   "settings.updates": "Mises à jour de l’app",

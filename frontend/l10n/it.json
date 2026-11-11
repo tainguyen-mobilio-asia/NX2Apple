@@ -1898,6 +1898,8 @@
   "settings.setup": "Esegui di nuovo la configurazione",
   "settings.setupBtn": "Esegui",
   "settings.setupNote": "Ripercorri la configurazione iniziale: Xcode, strumenti di build, chiavi e giochi",
+  "settings.showFPS": "Mostra i fotogrammi al secondo nei giochi",
+  "settings.showFPSNote": "Ogni gioco per Mac avviato dal launcher mostra i fotogrammi al secondo in una piccola etichetta in alto a sinistra. Un gioco compilato prima che esistesse questo interruttore va ricompilato una volta",
   "settings.showTools": "Mostra gli strumenti",
   "settings.toolMissing": "Manca uno strumento necessario",
   "settings.updates": "Aggiornamenti dell’app",

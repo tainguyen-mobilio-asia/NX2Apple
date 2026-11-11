@@ -1898,6 +1898,8 @@
   "settings.setup": "Kör inställningen igen",
   "settings.setupBtn": "Kör",
   "settings.setupNote": "Gå igenom den första inställningen igen: Xcode, byggverktyg, nycklar och spel",
+  "settings.showFPS": "Visa bildfrekvensen i spel",
+  "settings.showFPSNote": "Varje Mac-spel som startas från startprogrammet visar sina bilder per sekund i en liten bricka uppe till vänster. Ett spel som byggdes innan den här omkopplaren fanns behöver byggas om en gång",
   "settings.showTools": "Visa verktyg",
   "settings.toolMissing": "Ett nödvändigt verktyg saknas",
   "settings.updates": "Appuppdateringar",
