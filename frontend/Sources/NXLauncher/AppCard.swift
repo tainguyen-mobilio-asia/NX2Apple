@@ -12,6 +12,7 @@ package struct AppCard: View {
     let notify: Binding<Bool>
     let notifyAvailable: Bool   // false without an app bundle, e.g. under swift run
     let returnAfterPlay: Binding<Bool>
+    let showFPS: Binding<Bool>   // the frame-rate counter in every Mac game (ShowFrameRate.swift)
     let preflightAfterBuild: Binding<Bool>
     let onRunSetup: (() -> Void)?   // the guided first-run setup, again (nil where there is none)
     let uninstallPlan: () -> Uninstall.Plan
@@ -21,7 +22,7 @@ package struct AppCard: View {
 
     package enum Part { case general, updates, maintenance }
 
-    package init(updates: AppUpdateStore, buildRunning: Bool, notify: Binding<Bool>, notifyAvailable: Bool, returnAfterPlay: Binding<Bool>,
+    package init(updates: AppUpdateStore, buildRunning: Bool, notify: Binding<Bool>, notifyAvailable: Bool, returnAfterPlay: Binding<Bool>, showFPS: Binding<Bool> = .constant(false),
                  preflightAfterBuild: Binding<Bool>, onRunSetup: (() -> Void)?, uninstallPlan: @escaping () -> Uninstall.Plan, part: Part = .general) {
         self.part = part
         self.updates = updates
@@ -29,6 +30,7 @@ package struct AppCard: View {
         self.notify = notify
         self.notifyAvailable = notifyAvailable
         self.returnAfterPlay = returnAfterPlay
+        self.showFPS = showFPS
         self.preflightAfterBuild = preflightAfterBuild
         self.onRunSetup = onRunSetup
         self.uninstallPlan = uninstallPlan
@@ -86,6 +88,12 @@ package struct AppCard: View {
             CardRow(loc.t("settings.returnAfterPlay"), detail: loc.t("settings.returnAfterPlayNote")) {
                 Toggle(loc.t("settings.returnAfterPlay"), isOn: returnAfterPlay).toggleStyle(LauncherSwitchStyle()).labelsHidden()
                     .padTarget("set.returnAfterPlay", scope: "main") { returnAfterPlay.wrappedValue.toggle() }
+            }
+            CardDivider()
+            // The frame-rate counter in every Mac game the launcher starts (ShowFrameRate.swift)
+            CardRow(loc.t("settings.showFPS"), detail: loc.t("settings.showFPSNote")) {
+                Toggle(loc.t("settings.showFPS"), isOn: showFPS).toggleStyle(LauncherSwitchStyle()).labelsHidden()
+                    .padTarget("set.showFPS", scope: "main") { showFPS.wrappedValue.toggle() }
             }
             CardDivider()
             // A new Mac app's first start checked by macOS as the build's last stage (MacPreflight, #1005)

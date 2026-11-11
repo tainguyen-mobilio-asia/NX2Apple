@@ -11,7 +11,7 @@ enum GameStart {
     @MainActor static func environment(for game: LibraryGame, library: GameLibrary, controls: ControlLayout, repo: String,
                                        labels: (String) -> String, lang: Lang = Lang.initial(), fullscreen: Bool = false, player: PlayerProfile? = nil,
                                        saves: (global: SaveGlobalSettings, game: SaveGameOverride)? = nil,
-                                       sticks: StickDeadzoneSettings? = nil, homeMenu: Bool = false, launcherBundleID: String? = Bundle.main.bundleIdentifier,
+                                       sticks: StickDeadzoneSettings? = nil, showFPS: Bool = ShowFrameRate.enabled, homeMenu: Bool = false, launcherBundleID: String? = Bundle.main.bundleIdentifier,
                                        screen: NSScreen? = NSApp?.keyWindow?.screen ?? NSScreen.main) -> [String: String] {
         library.migrateLaunchOptions()
         CloudSavesMigration.run()   // before the app reads its env.txt: DM_SAVE_SYNC=icloud keeps the folder the iPhone app uses
@@ -29,6 +29,7 @@ enum GameStart {
         environment["DM_HOME_QUIT_TEXT"] = HomeButtonHint.promptText(gameName: game.displayName(lang), labels: labels, homeMenu: homeMenu)   // the game's Home button quit prompt in the launcher's language (#336)
         // Console mode's game: the Home menu's Back to console mode, which pauses it in the background (#952). The desktop's Play passes none.
         if homeMenu { environment.merge(HomeButtonHint.homeMenuEnvironment(launcherBundleID: launcherBundleID)) { $1 } }
+        environment.merge(ShowFrameRate.environment(on: showFPS)) { $1 }   // Settings' "Show the frame rate in games" (ShowFrameRate.swift): on wins over the game's own row
         if let sticks { environment.merge(sticks.environment) { _, own in own } }   // DM_STICK_DEADZONE_L / _R: off adds nothing
         // The global setup and this game's own choices (SaveLocation.swift): a save folder and a cloud folder. A game with nothing set adds nothing.
         var base = SaveTransfer.macSave(titleID: game.titleID, appPath: game.appPath).save

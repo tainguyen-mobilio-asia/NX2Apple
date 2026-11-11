@@ -31,6 +31,7 @@ struct SettingsPage: View {
     @AppStorage(ConsolePrompt.startKey) private var startInConsole = false   // ConsoleCoordinator.swift (#336)
     @AppStorage(BuildNotice.defaultsKey) private var notifyBuilds = true   // BuildNotifications.swift
     @AppStorage(ReturnAfterPlay.defaultsKey) private var returnAfterPlay = true   // ReturnAfterPlay.swift
+    @AppStorage(ShowFrameRate.defaultsKey) private var showFPS = false   // ShowFrameRate.swift
     @AppStorage(MacPreflight.defaultsKey) private var preflightAfterBuild = true   // MacPreflight.swift (#1005)
     @Environment(\.launcherScrollTo) private var scrollTo
     @EnvironmentObject var loc: Localizer
@@ -65,7 +66,7 @@ struct SettingsPage: View {
 
     private func appCard(_ part: AppCard.Part) -> AppCard {
         AppCard(updates: updates, buildRunning: build.running, notify: $notifyBuilds, notifyAvailable: BuildNotice.hasBundleID,
-                returnAfterPlay: $returnAfterPlay, preflightAfterBuild: $preflightAfterBuild, onRunSetup: onRunSetup, uninstallPlan: uninstallPlan, part: part)
+                returnAfterPlay: $returnAfterPlay, showFPS: $showFPS, preflightAfterBuild: $preflightAfterBuild, onRunSetup: onRunSetup, uninstallPlan: uninstallPlan, part: part)
     }
 
     @ViewBuilder private var general: some View {

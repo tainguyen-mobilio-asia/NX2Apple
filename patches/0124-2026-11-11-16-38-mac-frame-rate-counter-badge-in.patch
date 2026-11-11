@@ -1,0 +1,114 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tai Nguyen <tai.nguyen@mobilio.asia>
+Date: Wed, 11 Nov 2026 16:38:07 +0700
+Subject: [PATCH] 2026-11-11 16:38 - Mac: frame-rate counter badge in the game
+ window (DM_SHOW_FPS)
+
+- front_mac.m draws a small badge at the top left of the game's window when DM_SHOW_FPS=1, as the iPhone's: the frames put on screen in the last second (mtl_present_count)
+- settings.tsv offers Frame-rate counter on the Mac too, off by default there. The iPhone keeps the build's default
+- test_launcher_settings and docs/settings.md follow
+
+Upstream-Status: pending
+Reason: A Mac game had no small frame-rate readout: only Apple's full Metal performance HUD. The iPhone app already has the badge
+Issue: none (a personal fork feature, not proposed to LNPANDY/NX2Apple)
+
+---
+ dm/games/settings.tsv                    |  2 +-
+ dm/host/front_mac.m                      | 22 ++++++++++++++++++++++
+ dm/tools/tests/test_launcher_settings.py |  5 +++--
+ docs/settings.md                         |  4 ++--
+ 4 files changed, 28 insertions(+), 5 deletions(-)
+
+diff --git a/dm/games/settings.tsv b/dm/games/settings.tsv
+index 89c69f1..9832e0d 100644
+--- a/dm/games/settings.tsv
++++ b/dm/games/settings.tsv
+@@ -24,7 +24,7 @@ DM_UPSCALER	choice	game=Game's own,metalfx=MetalFX	game	DM_GAME_UPSCALER_N!=0	Ga
+ DM_LANG	choice	languages	build:DM_LANG	languages>1	Game	Game language		level=basic
+ DM_FULLSCREEN	choice	0=Window,1=Fullscreen	0	platform:mac	Game	Display mode		level=basic
+ DM_PICTURE_FIT	choice	fit=Fit,fill=Fill	fit	platform:ios	Game	Picture	Fill crops the game's 16:9 picture to cover the screen. Health bars, subtitles or maps near the edges can be cut off. A full-screen picture without cropping needs a patch for each game.
+-DM_SHOW_FPS	toggle	-	build:DM_SHOW_FPS	platform:ios	Game	Frame-rate counter
++DM_SHOW_FPS	toggle	-	build:DM_SHOW_FPS|0	always	Game	Frame-rate counter
+ DM_TOUCH_HAPTICS	toggle	-	1	platform:ios	Controls	Touch feedback
+ DM_TOUCH_SIZE	choice	small=Small,medium=Medium,large=Large	medium	platform:ios	Controls	Size	The size of the on-screen controls. Controls move toward medium when a size does not fit the screen.
+ DM_TOUCH_STICK	choice	corner=Corner,higher=Higher,inward=Inward	corner	platform:ios	Controls	Left stick	Where the left stick of the on-screen controls sits.
+diff --git a/dm/host/front_mac.m b/dm/host/front_mac.m
+index b407953..6df8af4 100644
+--- a/dm/host/front_mac.m
++++ b/dm/host/front_mac.m
+@@ -507,6 +507,27 @@ - (void)windowDidFailToEnterFullScreen:(NSWindow *)w { (void)w; if (g_fs_failed)
+     ((guest_arg *)p)->fn(); LOG("guest thread finished"); exit(0);
+ }
+ 
++// Frame-rate counter (DM_SHOW_FPS=1, the launch settings' Frame-rate counter): a small badge at the top left of the game's picture, as the iPhone's (front_ios.m): the frames put
++// on screen in the last second (nvn_mtl.m counts them for NVN and for the Vulkan layer alike; frames the display link merged away are not counted)
++uint64_t mtl_present_count(void);
++static void fps_badge(NSView *cv) {
++    NSTextField *l = [NSTextField labelWithString:@"-- fps"];
++    l.font = [NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightSemibold]; l.textColor = NSColor.whiteColor; l.alignment = NSTextAlignmentCenter;
++    NSView *box = [[NSView alloc] initWithFrame:NSMakeRect(12, cv.bounds.size.height - 12 - 22, 64, 22)];
++    box.autoresizingMask = NSViewMaxXMargin | NSViewMinYMargin;   // stays at the top left when the window is resized or goes fullscreen
++    box.wantsLayer = YES; box.layer.backgroundColor = [NSColor colorWithWhite:0 alpha:0.45].CGColor; box.layer.cornerRadius = 6;
++    l.frame = NSMakeRect(0, floor((22 - l.intrinsicContentSize.height) / 2), 64, l.intrinsicContentSize.height);
++    [box addSubview:l]; [cv addSubview:box];
++    __block uint64_t n0 = mtl_present_count(); __block double t0 = CACurrentMediaTime();
++    NSTimer *t = [NSTimer timerWithTimeInterval:1.0 repeats:YES block:^(NSTimer *tm) {
++        (void)tm; uint64_t n = mtl_present_count(); double now = CACurrentMediaTime();
++        if (now - t0 < 1.5) l.stringValue = [NSString stringWithFormat:@"%.0f fps", (n - n0) / (now - t0)];   // a longer span is a stalled main thread: no reading
++        n0 = n; t0 = now;
++    }];
++    [NSRunLoop.mainRunLoop addTimer:t forMode:NSRunLoopCommonModes];   // common modes: it keeps counting while a menu is open or the window is resized
++    LOG("front end: frame-rate counter on (DM_SHOW_FPS)");
++}
++
+ // Metal reads MTL_HUD_ENABLED when the process makes its first device, which can be before the window: set from DM_METAL_HUD before main (set in front_run, the HUD did not show)
+ __attribute__((constructor)) static void hud_env(void) { front_hud_env(); }
+ 
+@@ -1401,6 +1422,7 @@ void front_run(void (*guest)(void)) {
+         [win makeKeyAndOrderFront:nil];
+         screen_refresh(win.screen ?: NSScreen.mainScreen);
+         g_win = win;
++        if (getenv("DM_SHOW_FPS") && atoi(getenv("DM_SHOW_FPS"))) fps_badge(win.contentView);
+         // Activated once the run loop below runs, not here: an app that takes the front while its main thread is still busy with the setup below can show
+         // the pointer for a frame although it hid it (DM_CURSOR_HIDDEN, issue #380)
+         dispatch_async(dispatch_get_main_queue(), ^{ [NSApp activateIgnoringOtherApps:YES]; });
+diff --git a/dm/tools/tests/test_launcher_settings.py b/dm/tools/tests/test_launcher_settings.py
+index c796c51..28948f4 100644
+--- a/dm/tools/tests/test_launcher_settings.py
++++ b/dm/tools/tests/test_launcher_settings.py
+@@ -105,10 +105,11 @@ class LauncherSettingsTests(unittest.TestCase):
+         s = build(BOTW, 'nvn')['DM_SHOW_FPS']
+         self.assertEqual((s['on'], s['off']), ('1', '0'))
+ 
+-    def test_iphone_switches_only_on_the_iphone(self):   # the frame-rate counter and touch feedback are the iOS front end's (front_ios.m, DmGamepad.m)
++    def test_iphone_switches_only_on_the_iphone(self):   # touch feedback and the touch controls are the iOS front end's (DmGamepad.m); the frame-rate counter is on both (front_ios.m, front_mac.m)
+         ios, mac = build(BOTW, 'nvn'), build(BOTW, 'nvn', 'mac')
+         self.assertEqual(build(BOTW, 'nvn', 'ios').keys(), ios.keys())   # ios when unset
+-        self.assertEqual(set(ios) - set(mac), {'DM_SHOW_FPS', 'DM_TOUCH_HAPTICS', 'DM_PICTURE_FIT', 'DM_TOUCH_SIZE', 'DM_TOUCH_STICK'})
++        self.assertEqual(set(ios) - set(mac), {'DM_TOUCH_HAPTICS', 'DM_PICTURE_FIT', 'DM_TOUCH_SIZE', 'DM_TOUCH_STICK'})
++        self.assertEqual((mac['DM_SHOW_FPS']['kind'], mac['DM_SHOW_FPS']['default'], mac['DM_SHOW_FPS']['section']), ('toggle', '0', 'Game'))   # the Mac window's badge (front_mac.m), off until the player turns it on
+         self.assertIn('DM_RUMBLE', mac); self.assertIn('DM_METAL_HUD', mac)
+         self.assertEqual(set(mac) - set(ios), {'DM_FULLSCREEN', 'DM_SW2'})   # the Mac window's Display mode (front_mac.m reads 1 or 0); Switch 2 controllers (pad_switch2_apple.m, wired on the Mac only)
+         s = mac['DM_FULLSCREEN']
+diff --git a/docs/settings.md b/docs/settings.md
+index 2f166f3..33a4138 100644
+--- a/docs/settings.md
++++ b/docs/settings.md
+@@ -17,7 +17,7 @@ Each game comes with the settings it was tested with: its profile in this reposi
+ 
+ When you change a setting and tap **Play**, the app keeps your choice, also when a later build of the app ships other defaults. A setting you leave at its default is not stored: it follows the defaults of the build you have, so a newer build's tested settings reach you without doing anything. **Reset to tested defaults** at the bottom sets every setting back to its default, and **Play** then forgets your choices, so the game's defaults apply again. For testing, a line in `Documents/env.txt` overrides any setting ([Settings in a file](#settings-in-a-file)).
+ 
+-A Mac app carries the same list (`Contents/Resources/dm/launcher.json`), without the iPhone's own Frame-rate counter and Touch feedback, for a front end that starts the app with the chosen values ([Front ends](frontends.md)).
++A Mac app carries the same list (`Contents/Resources/dm/launcher.json`), without the iPhone's own Touch feedback and touch controls, for a front end that starts the app with the chosen values ([Front ends](frontends.md)).
+ 
+ ## Game
+ 
+@@ -91,7 +91,7 @@ Games whose profile supports it (Breath of the Wild, Animal Crossing: New Horizo
+ 
+ ### Frame-rate counter
+ 
+-Shows the frames per second at the top left.
++Shows the frames per second at the top left. On the Mac it is a small badge in the game's window, off by default.
+ 
+ ## Controls
+ 

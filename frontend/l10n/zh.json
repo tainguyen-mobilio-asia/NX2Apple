@@ -1898,6 +1898,8 @@
   "settings.setup": "再次运行设置",
   "settings.setupBtn": "运行",
   "settings.setupNote": "重新走一遍首次设置：Xcode、构建工具、密钥和游戏",
+  "settings.showFPS": "在游戏中显示帧率",
+  "settings.showFPSNote": "从启动器启动的每个 Mac 游戏都会在左上角用一个小标签显示每秒帧数。在有这个开关之前构建的游戏需要重新构建一次",
   "settings.showTools": "显示工具",
   "settings.toolMissing": "缺少必需的工具",
   "settings.updates": "应用更新",

@@ -1897,6 +1897,8 @@
   "settings.setup": "Run setup again",
   "settings.setupBtn": "Run",
   "settings.setupNote": "Walk through first-run setup again: Xcode, build tools, keys and games",
+  "settings.showFPS": "Show the frame rate in games",
+  "settings.showFPSNote": "Every Mac game started from the launcher shows its frames per second in a small badge at the top left. A game built before this switch existed needs one rebuild",
   "settings.showTools": "Show tools",
   "settings.toolMissing": "A required tool is missing",
   "settings.updates": "App updates",
